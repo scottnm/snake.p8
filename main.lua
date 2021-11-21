@@ -157,23 +157,33 @@ function _update()
     end
 
     -- check for collisions with any pellets
+    any_pellets_eaten = false
     for pellet in all(pellets) do
         if collides(snake.segments[1], pellet) then
             score += 1
             pellet.eaten = true
+            any_pellets_eaten = true
         end
     end
 
-    -- clean up any eaten pellets
-    next_pellet_idx = 1
-    while next_pellet_idx <= #pellets do
-        if pellets[next_pellet_idx].eaten then
-            pellets[next_pellet_idx] = pellets[#pellets]
-            pellets[#pellets] = nil
-        else
-            next_pellet_idx += 1
+    if any_pellets_eaten then
+        -- clean up any eaten pellets
+        next_pellet_idx = 1
+        while next_pellet_idx <= #pellets do
+            if pellets[next_pellet_idx].eaten then
+                pellets[next_pellet_idx] = pellets[#pellets]
+                pellets[#pellets] = nil
+            else
+                next_pellet_idx += 1
+            end
         end
     end
+
+    -- generate a new pellet if ready
+    if any_pellets_eaten then
+        generate_pellet(pellets)
+    end
+
 end
 
 function draw_snake_segment(segment)
