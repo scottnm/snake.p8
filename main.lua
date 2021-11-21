@@ -3,6 +3,7 @@ pellets = {}
 snake = {
     segments = {},
 }
+score = 0
 
 function set_pos_cmpt(e, xpos, ypos)
     e.pos = { x = xpos, y = ypos }
@@ -158,7 +159,19 @@ function _update()
     -- check for collisions with any pellets
     for pellet in all(pellets) do
         if collides(snake.segments[1], pellet) then
-            pellet.color += 1
+            score += 1
+            pellet.eaten = true
+        end
+    end
+
+    -- clean up any eaten pellets
+    next_pellet_idx = 1
+    while next_pellet_idx <= #pellets do
+        if pellets[next_pellet_idx].eaten then
+            pellets[next_pellet_idx] = pellets[#pellets]
+            pellets[#pellets] = nil
+        else
+            next_pellet_idx += 1
         end
     end
 end
@@ -176,4 +189,5 @@ function _draw()
 
     foreach(snake.segments, draw_snake_segment)
     foreach(pellets, draw_pellet)
+    print("score: "..score, 0, 0, 7)
 end
