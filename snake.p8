@@ -1,8 +1,15 @@
 pico-8 cartridge // http://www.pico-8.com
 version 29
 __lua__
--- include the main game
-#include main.lua
+
+-- run the main game
+-- #include main.lua 
+
+-- -- run hello world #1
+-- #include helloworld1.lua 
+
+-- run hello world #2
+#include helloworld2.lua 
 
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
