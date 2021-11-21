@@ -93,7 +93,7 @@ function generate_snake_segment(snake, xpos, ypos, dir)
     set_pos_cmpt(segment, xpos, ypos)
     set_size_cmpt(segment, 7)
     set_circle_collider_cmpt(segment, 7)
-    set_color_cmpt(segment, 14)
+    set_color_cmpt(segment, 3)
     set_direction_cmpt(segment, dir)
 
     add(snake.segments, segment)
@@ -108,7 +108,7 @@ function generate_pellet(pellets)
 
     set_size_cmpt(pellet, 2)
     set_circle_collider_cmpt(pellet, 2)
-    set_color_cmpt(pellet, 14)
+    set_color_cmpt(pellet, 7)
 
     add(pellets, pellet)
 end
@@ -172,7 +172,7 @@ function draw_pellet(pellet)
 end
 
 function _draw()
-    cls(5)
+    cls(4)
 
     foreach(snake.segments, draw_snake_segment)
     foreach(pellets, draw_pellet)
