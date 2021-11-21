@@ -6,10 +6,11 @@ dir = {
 }
 
 snake = {
-    dir = dir.up,
-    pos = {
-        x = 64,
-        y = 64,
+    segments = {
+        {
+            dir = dir.up,
+            pos = { x = 64, y = 64 },
+        }
     },
 }
 
@@ -58,14 +59,15 @@ function poll_input(input)
 end
 
 function update_direction(input, snake)
+    head = snake.segments[1]
     if input.btn_left and input.btn_left_change then
-        snake.dir = dir.left
+        head.dir = dir.left
     elseif input.btn_right and input.btn_right_change then
-        snake.dir = dir.right
+        head.dir = dir.right
     elseif input.btn_up and input.btn_up_change then
-        snake.dir = dir.up
+        head.dir = dir.up
     elseif input.btn_down and input.btn_down_change then
-        snake.dir = dir.down
+        head.dir = dir.down
     end
 end
 
@@ -73,18 +75,23 @@ function _update()
     input = poll_input(input)
     update_direction(input, snake)
 
-    if snake.dir == dir.up then
-        snake.pos.y -= 1
-    elseif snake.dir == dir.down then
-        snake.pos.y += 1
-    elseif snake.dir == dir.left then
-        snake.pos.x -= 1
-    elseif snake.dir == dir.right then
-        snake.pos.x += 1
+    for segment in all(snake.segments) do
+        if segment.dir == dir.up then
+            segment.pos.y -= 1
+        elseif segment.dir == dir.down then
+            segment.pos.y += 1
+        elseif segment.dir == dir.left then
+            segment.pos.x -= 1
+        elseif segment.dir == dir.right then
+            segment.pos.x += 1
+        end
     end
 end
 
 function _draw()
     cls(5)
-    circfill(snake.pos.x, snake.pos.y, 7, 14)
+
+    for segment in all(snake.segments) do
+        circfill(segment.pos.x, segment.pos.y, 7, 14)
+    end
 end
