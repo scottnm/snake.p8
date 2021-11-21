@@ -1,3 +1,5 @@
+pico8_screen_size = 128
+
 dir = {
     up = 1,
     right = 2,
@@ -13,6 +15,9 @@ snake = {
         }
     },
 }
+
+
+pellets = {}
 
 -- FIXME: replace with a better btn enum state { off, pressed, held, released }
 function poll_input(input)
@@ -58,6 +63,21 @@ function poll_input(input)
     return input
 end
 
+function generate_pellet()
+    pellet_x = rnd_range(0, pico8_screen_size)
+    pellet_y = rnd_range(0, pico8_screen_size)
+    pellet_pos = { x = pellet_x, y = pellet_y }
+    add(pellets, { pos = pellet_pos })
+end
+
+function _init()
+    generate_pellet()
+end
+
+function rnd_range(lower, upper)
+    return rnd(upper - lower) + lower
+end
+
 function update_direction(input, snake)
     head = snake.segments[1]
     if input.btn_left and input.btn_left_change then
@@ -88,10 +108,17 @@ function _update()
     end
 end
 
+function draw_snake_segment(segment)
+    circfill(segment.pos.x, segment.pos.y, 7, 14)
+end
+
+function draw_pellet(pellet)
+    circfill(pellet.pos.x, pellet.pos.y, 2, 14)
+end
+
 function _draw()
     cls(5)
 
-    for segment in all(snake.segments) do
-        circfill(segment.pos.x, segment.pos.y, 7, 14)
-    end
+    foreach(snake.segments, draw_snake_segment)
+    foreach(pellets, draw_pellet)
 end
