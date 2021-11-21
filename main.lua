@@ -1,4 +1,39 @@
 pico8_screen_size = 128
+pellets = {}
+snake = {
+    segments = {},
+}
+
+function set_pos_cmpt(e, xpos, ypos)
+    e.pos = { x = xpos, y = ypos }
+end
+
+function set_size_cmpt(e, size)
+    e.size = size
+end
+
+function set_circle_collider_cmpt(e, r)
+    e.collider = { radius = r }
+end
+
+function set_direction_cmpt(e, dir)
+    e.dir = dir
+end
+
+function set_color_cmpt(e, color)
+    e.color = color
+end
+
+function collides(e1, e2)
+    max_collision_radius = e1.collider.radius + e2.collider.radius
+    max_collision_radius_squared = max_collision_radius * max_collision_radius
+
+    x_delta = (e1.pos.x - e2.pos.x)
+    y_delta = (e1.pos.y - e2.pos.y)
+    distance_squared = (x_delta * x_delta) + (y_delta * y_delta)
+
+    return distance_squared <= max_collision_radius_squared
+end
 
 dir = {
     up = 1,
@@ -7,17 +42,6 @@ dir = {
     left = 4,
 }
 
-snake = {
-    segments = {
-        {
-            dir = dir.up,
-            pos = { x = 64, y = 64 },
-        }
-    },
-}
-
-
-pellets = {}
 
 -- FIXME: replace with a better btn enum state { off, pressed, held, released }
 function poll_input(input)
@@ -63,15 +87,35 @@ function poll_input(input)
     return input
 end
 
-function generate_pellet()
+function generate_snake_segment(snake, xpos, ypos, dir)
+    segment = {}
+
+    set_pos_cmpt(segment, xpos, ypos)
+    set_size_cmpt(segment, 7)
+    set_circle_collider_cmpt(segment, 7)
+    set_color_cmpt(segment, 14)
+    set_direction_cmpt(segment, dir)
+
+    add(snake.segments, segment)
+end
+
+function generate_pellet(pellets)
+    pellet = {}
+
     pellet_x = rnd_range(0, pico8_screen_size)
     pellet_y = rnd_range(0, pico8_screen_size)
-    pellet_pos = { x = pellet_x, y = pellet_y }
-    add(pellets, { pos = pellet_pos })
+    set_pos_cmpt(pellet, pellet_x, pellet_y)
+
+    set_size_cmpt(pellet, 2)
+    set_circle_collider_cmpt(pellet, 2)
+    set_color_cmpt(pellet, 14)
+
+    add(pellets, pellet)
 end
 
 function _init()
-    generate_pellet()
+    generate_snake_segment(snake, 64, 64, dir.up)
+    generate_pellet(pellets)
 end
 
 function rnd_range(lower, upper)
@@ -92,9 +136,13 @@ function update_direction(input, snake)
 end
 
 function _update()
+    -- get the next frame of input
     input = poll_input(input)
+
+    -- potentially redirect the snake
     update_direction(input, snake)
 
+    -- move all of the snake pieces
     for segment in all(snake.segments) do
         if segment.dir == dir.up then
             segment.pos.y -= 1
@@ -106,14 +154,21 @@ function _update()
             segment.pos.x += 1
         end
     end
+
+    -- check for collisions with any pellets
+    for pellet in all(pellets) do
+        if collides(snake.segments[1], pellet) then
+            pellet.color += 1
+        end
+    end
 end
 
 function draw_snake_segment(segment)
-    circfill(segment.pos.x, segment.pos.y, 7, 14)
+    circfill(segment.pos.x, segment.pos.y, segment.size, segment.color)
 end
 
 function draw_pellet(pellet)
-    circfill(pellet.pos.x, pellet.pos.y, 2, 14)
+    circfill(pellet.pos.x, pellet.pos.y, pellet.size, pellet.color)
 end
 
 function _draw()
