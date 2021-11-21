@@ -5,6 +5,7 @@ snake = {
 }
 score = 0
 
+-- FIXME: maybe I should get rid of these component helpers if they're just bloating the code. I only have so many tokens and characters :)
 function set_pos_cmpt(e, xpos, ypos)
     e.pos = { x = xpos, y = ypos }
 end
@@ -42,7 +43,6 @@ dir = {
     down = 3,
     left = 4,
 }
-
 
 -- FIXME: replace with a better btn enum state { off, pressed, held, released }
 function poll_input(input)
