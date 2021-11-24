@@ -27,15 +27,15 @@ function set_color_cmpt(e, color)
 end
 
 function rect_collision(e1, e2)
-    e1_rect_x_start = e1.pos.x
-    e1_rect_x_end  = e1.pos.x + e1.collider.width
-    e1_rect_y_start = e1.pos.y
-    e1_rect_y_end = e1.pos.y + e1.collider.height
+    x_collision_start = e1.pos.x - e2.collider.width
+    x_collision_end = e1.pos.x + e1.collider.width
+    y_collision_start = e1.pos.y - e2.collider.height
+    y_collision_end = e1.pos.y + e1.collider.height
 
-    return e2.pos.x >= e1_rect_x_start and 
-           e2.pos.x <= e1_rect_x_end and
-           e2.pos.y >= e1_rect_y_start and
-           e2.pos.y <= e1_rect_y_end
+    return e2.pos.x >= x_collision_start and 
+           e2.pos.x <= x_collision_end and
+           e2.pos.y >= y_collision_start and
+           e2.pos.y <= y_collision_end
 end
 
 function collides(e1, e2)
@@ -197,12 +197,8 @@ function _update()
 
 end
 
-function draw_snake_segment(segment)
-    rect(segment.pos.x, segment.pos.y, segment.pos.x + segment.size, segment.pos.y + segment.size, segment.color)
-end
-
-function draw_pellet(pellet)
-    rect(pellet.pos.x, pellet.pos.y, pellet.pos.x + pellet.size, pellet.pos.y + pellet.size, pellet.color)
+function draw_sqr(sqr)
+    rect(sqr.pos.x, sqr.pos.y, sqr.pos.x + sqr.size, sqr.pos.y + sqr.size, sqr.color)
 end
 
 function printsqr(sqrname, pos, size, printx, printy)
@@ -212,8 +208,8 @@ end
 function _draw()
     cls(4)
 
-    foreach(snake.segments, draw_snake_segment)
-    foreach(pellets, draw_pellet)
+    foreach(snake.segments, draw_sqr)
+    foreach(pellets, draw_sqr)
     print("score: "..score, 0, 0, 7)
 
     printsqr("sk", snake.segments[1].pos, snake.segments[1].size, 0, 10)
