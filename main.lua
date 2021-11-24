@@ -3,6 +3,9 @@ pellets = {}
 snake = {
     segments = {},
 }
+snake_color = 3
+snake_flash_color = 8
+game_over = false
 score = 0
 
 -- FIXME: maybe I should get rid of these component helpers if they're just bloating the code. I only have so many tokens and characters :)
@@ -100,7 +103,7 @@ function generate_snake_segment(snake, xpos, ypos, dir)
     set_pos_cmpt(segment, xpos, ypos)
     set_size_cmpt(segment, snake_size)
     set_rect_collider_cmpt(segment, snake_size, snake_size)
-    set_color_cmpt(segment, 3)
+    set_color_cmpt(segment, snake_color)
     set_direction_cmpt(segment, dir)
 
     segment.last = {}
@@ -146,9 +149,17 @@ function update_direction(input, snake)
     end
 end
 
+function _update()
+    if game_over then
+        game_over_screen_update()
+    else
+        game_screen_update()
+    end
+end
+
 move_cnt = 0
 move_period = 15
-function _update()
+function game_screen_update()
     -- get the next frame of input
     input = poll_input(input)
 
@@ -185,6 +196,19 @@ function _update()
         move_cnt = 0
     end
 
+    -- check for snake colliding with itself
+    for i=2,#snake.segments do
+        -- FIXME: maybe snake head should be a special element in the snake data
+        tail_segment = snake.segments[i]
+        if collides(snake.segments[1], tail_segment) then
+            snake.segments[1].game_over_collision = true
+            tail_segment.game_over_collision = true
+            game_over = true
+            return
+        end
+    end
+
+
     -- check for collisions with any pellets
     any_pellets_eaten = false
     for pellet in all(pellets) do
@@ -203,6 +227,7 @@ function _update()
         end
     end
 
+    -- NOTE: improve by supporting spawning multiple pellets
     if any_pellets_eaten then
         -- clean up any eaten pellets
         next_pellet_idx = 1
@@ -220,7 +245,29 @@ function _update()
     if any_pellets_eaten then
         generate_pellet(pellets)
     end
+end
 
+flash_cnt = 0
+function game_over_screen_update()
+    tail_segment = nil
+    for segment in all(snake.segments) do
+        if segment ~= snake.segments[1] and segment.game_over_collision then
+            tail_segment = segment
+            break
+        end
+    end
+
+    flash_cnt = (flash_cnt + 1) % 30
+
+    color = snake_color
+    if flash_cnt <= 15 then
+        color = snake_flash_color
+    end
+
+    snake.segments[1].color = color    
+    if tail_segment ~= nil then
+        tail_segment.color = color    
+    end
 end
 
 function draw_sqr(sqr)
@@ -233,11 +280,12 @@ end
 
 function _draw()
     cls(4)
-
     foreach(snake.segments, draw_sqr)
     foreach(pellets, draw_sqr)
     print("score: "..score, 0, 0, 7)
-
     -- printsqr("sk", snake.segments[1].pos, snake.segments[1].size, 0, 10)
     -- printsqr("p", pellets[1].pos, pellets[1].size, 0, 20)
+    
+    if game_over then
+    end
 end
