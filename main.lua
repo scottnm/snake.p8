@@ -146,6 +146,7 @@ function update_direction(input, snake)
 end
 
 move_cnt = 0
+move_period = 15
 function _update()
     -- get the next frame of input
     input = poll_input(input)
@@ -155,7 +156,7 @@ function _update()
 
     -- move all of the snake pieces
     move_cnt += 1
-    if move_cnt == 15 then
+    if move_cnt == move_period then
         -- move the snake head and record its last position
         snake_head = snake.segments[1]
         snake_head.last.pos.x = snake_head.pos.x
@@ -192,6 +193,12 @@ function _update()
             any_pellets_eaten = true
             last_segment = snake.segments[#snake.segments]
             generate_snake_segment(snake, last_segment.last.pos.x, last_segment.last.pos.y, dir.up) -- fixme: dir.up not needed
+
+            -- every 3rd snake segment, make the snake move faster
+            -- but cap out our speed increases at a certain point
+            if #snake.segments % 3 == 0 and move_period > 3 then
+                move_period -= 1
+            end
         end
     end
 
