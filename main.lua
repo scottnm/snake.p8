@@ -14,8 +14,8 @@ function set_size_cmpt(e, size)
     e.size = size
 end
 
-function set_circle_collider_cmpt(e, r)
-    e.collider = { radius = r }
+function set_rect_collider_cmpt(e, w, h)
+    e.collider = { width = w, height = h }
 end
 
 function set_direction_cmpt(e, dir)
@@ -26,15 +26,20 @@ function set_color_cmpt(e, color)
     e.color = color
 end
 
+function rect_collision(e1, e2)
+    e1_rect_x_start = e1.pos.x
+    e1_rect_x_end  = e1.pos.x + e1.collider.width
+    e1_rect_y_start = e1.pos.y
+    e1_rect_y_end = e1.pos.y + e1.collider.height
+
+    return e2.pos.x >= e1_rect_x_start and 
+           e2.pos.x <= e1_rect_x_end and
+           e2.pos.y >= e1_rect_y_start and
+           e2.pos.y <= e1_rect_y_end
+end
+
 function collides(e1, e2)
-    max_collision_radius = e1.collider.radius + e2.collider.radius
-    max_collision_radius_squared = max_collision_radius * max_collision_radius
-
-    x_delta = (e1.pos.x - e2.pos.x)
-    y_delta = (e1.pos.y - e2.pos.y)
-    distance_squared = (x_delta * x_delta) + (y_delta * y_delta)
-
-    return distance_squared <= max_collision_radius_squared
+    return rect_collision(e1, e2) or rect_collision(e2, e1)
 end
 
 dir = {
@@ -72,17 +77,17 @@ function poll_input(input)
         btn_x = btn(5),
     }
 
-    input.btn_left_change = (input.btn_left_change ~= new_input.btn_left)
+    input.btn_left_change = (input.btn_left ~= new_input.btn_left)
     input.btn_left = new_input.btn_left
-    input.btn_right_change = (input.btn_right_change ~= new_input.btn_right)
+    input.btn_right_change = (input.btn_right ~= new_input.btn_right)
     input.btn_right = new_input.btn_right
-    input.btn_up_change = (input.btn_up_change ~= new_input.btn_up)
+    input.btn_up_change = (input.btn_up ~= new_input.btn_up)
     input.btn_up = new_input.btn_up
-    input.btn_down_change = (input.btn_down_change ~= new_input.btn_down)
+    input.btn_down_change = (input.btn_down ~= new_input.btn_down)
     input.btn_down = new_input.btn_down
-    input.btn_o_change = (input.btn_o_change ~= new_input.btn_o)
+    input.btn_o_change = (input.btn_o ~= new_input.btn_o)
     input.btn_o = new_input.btn_o
-    input.btn_x_change = (input.btn_x_change ~= new_input.btn_x)
+    input.btn_x_change = (input.btn_x ~= new_input.btn_x)
     input.btn_x = new_input.btn_x
 
     return input
@@ -92,8 +97,8 @@ function generate_snake_segment(snake, xpos, ypos, dir)
     segment = {}
 
     set_pos_cmpt(segment, xpos, ypos)
-    set_size_cmpt(segment, 7)
-    set_circle_collider_cmpt(segment, 7)
+    set_size_cmpt(segment, 4)
+    set_rect_collider_cmpt(segment, 4, 4)
     set_color_cmpt(segment, 3)
     set_direction_cmpt(segment, dir)
 
@@ -103,12 +108,12 @@ end
 function generate_pellet(pellets)
     pellet = {}
 
-    pellet_x = rnd_range(0, pico8_screen_size)
-    pellet_y = rnd_range(0, pico8_screen_size)
-    set_pos_cmpt(pellet, pellet_x, pellet_y)
+    pellet_x = rnd_int_range(0, pico8_screen_size)
+    pellet_y = rnd_int_range(0, pico8_screen_size)
 
-    set_size_cmpt(pellet, 2)
-    set_circle_collider_cmpt(pellet, 2)
+    set_pos_cmpt(pellet, pellet_x, pellet_y)
+    set_size_cmpt(pellet, 4)
+    set_rect_collider_cmpt(pellet, 4, 4)
     set_color_cmpt(pellet, 7)
 
     add(pellets, pellet)
@@ -119,8 +124,8 @@ function _init()
     generate_pellet(pellets)
 end
 
-function rnd_range(lower, upper)
-    return rnd(upper - lower) + lower
+function rnd_int_range(lower, upper)
+    return flr(rnd(upper - lower)) + lower
 end
 
 function update_direction(input, snake)
@@ -144,15 +149,21 @@ function _update()
     update_direction(input, snake)
 
     -- move all of the snake pieces
+    speed = 0.0
+    if (input.btn_o and input.btn_o_change) or input.btn_x then
+        speed = 1.0
+    else
+        speed = 0.0
+    end
     for segment in all(snake.segments) do
         if segment.dir == dir.up then
-            segment.pos.y -= 1
+            segment.pos.y -= speed
         elseif segment.dir == dir.down then
-            segment.pos.y += 1
+            segment.pos.y += speed
         elseif segment.dir == dir.left then
-            segment.pos.x -= 1
+            segment.pos.x -= speed
         elseif segment.dir == dir.right then
-            segment.pos.x += 1
+            segment.pos.x += speed
         end
     end
 
@@ -187,11 +198,15 @@ function _update()
 end
 
 function draw_snake_segment(segment)
-    circfill(segment.pos.x, segment.pos.y, segment.size, segment.color)
+    rect(segment.pos.x, segment.pos.y, segment.pos.x + segment.size, segment.pos.y + segment.size, segment.color)
 end
 
 function draw_pellet(pellet)
-    circfill(pellet.pos.x, pellet.pos.y, pellet.size, pellet.color)
+    rect(pellet.pos.x, pellet.pos.y, pellet.pos.x + pellet.size, pellet.pos.y + pellet.size, pellet.color)
+end
+
+function printsqr(sqrname, pos, size, printx, printy)
+    print(""..sqrname.." tl: (" ..pos.x.. ", " ..pos.y.. ") br: (" ..(pos.x+size).. ", " ..(pos.y+size).. ")", printx, printy, 7)
 end
 
 function _draw()
@@ -200,4 +215,7 @@ function _draw()
     foreach(snake.segments, draw_snake_segment)
     foreach(pellets, draw_pellet)
     print("score: "..score, 0, 0, 7)
+
+    printsqr("sk", snake.segments[1].pos, snake.segments[1].size, 0, 10)
+    printsqr("p", pellets[1].pos, pellets[1].size, 0, 20)
 end
