@@ -95,10 +95,11 @@ end
 
 function generate_snake_segment(snake, xpos, ypos, dir)
     segment = {}
+    snake_size = 8
 
     set_pos_cmpt(segment, xpos, ypos)
-    set_size_cmpt(segment, 4)
-    set_rect_collider_cmpt(segment, 4, 4)
+    set_size_cmpt(segment, snake_size)
+    set_rect_collider_cmpt(segment, snake_size, snake_size)
     set_color_cmpt(segment, 3)
     set_direction_cmpt(segment, dir)
 
@@ -110,7 +111,7 @@ end
 
 function generate_pellet(pellets)
     pellet = {}
-    pellet_size = 4
+    pellet_size = 8
 
     pellet_x = flr(rnd_int_range(0, pico8_screen_size) / pellet_size) * pellet_size
     pellet_y = flr(rnd_int_range(0, pico8_screen_size) / pellet_size) * pellet_size
@@ -196,7 +197,7 @@ function _update()
 
             -- every 3rd snake segment, make the snake move faster
             -- but cap out our speed increases at a certain point
-            if #snake.segments % 3 == 0 and move_period > 3 then
+            if #snake.segments % 2 == 0 and move_period > 3 then
                 move_period -= 1
             end
         end
