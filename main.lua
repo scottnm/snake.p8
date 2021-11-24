@@ -107,13 +107,14 @@ end
 
 function generate_pellet(pellets)
     pellet = {}
+    pellet_size = 4
 
-    pellet_x = rnd_int_range(0, pico8_screen_size)
-    pellet_y = rnd_int_range(0, pico8_screen_size)
+    pellet_x = flr(rnd_int_range(0, pico8_screen_size) / pellet_size) * pellet_size
+    pellet_y = flr(rnd_int_range(0, pico8_screen_size) / pellet_size) * pellet_size
 
     set_pos_cmpt(pellet, pellet_x, pellet_y)
-    set_size_cmpt(pellet, 4)
-    set_rect_collider_cmpt(pellet, 4, 4)
+    set_size_cmpt(pellet, pellet_size)
+    set_rect_collider_cmpt(pellet, pellet_size, pellet_size)
     set_color_cmpt(pellet, 7)
 
     add(pellets, pellet)
@@ -141,6 +142,7 @@ function update_direction(input, snake)
     end
 end
 
+move_cnt = 0
 function _update()
     -- get the next frame of input
     input = poll_input(input)
@@ -149,22 +151,20 @@ function _update()
     update_direction(input, snake)
 
     -- move all of the snake pieces
-    speed = 0.0
-    if (input.btn_o and input.btn_o_change) or input.btn_x then
-        speed = 1.0
-    else
-        speed = 0.0
-    end
-    for segment in all(snake.segments) do
-        if segment.dir == dir.up then
-            segment.pos.y -= speed
-        elseif segment.dir == dir.down then
-            segment.pos.y += speed
-        elseif segment.dir == dir.left then
-            segment.pos.x -= speed
-        elseif segment.dir == dir.right then
-            segment.pos.x += speed
+    move_cnt += 1
+    if move_cnt == 15 then
+        for segment in all(snake.segments) do
+            if segment.dir == dir.up then
+                segment.pos.y -= segment.size
+            elseif segment.dir == dir.down then
+                segment.pos.y += segment.size
+            elseif segment.dir == dir.left then
+                segment.pos.x -= segment.size
+            elseif segment.dir == dir.right then
+                segment.pos.x += segment.size
+            end
         end
+        move_cnt = 0
     end
 
     -- check for collisions with any pellets
