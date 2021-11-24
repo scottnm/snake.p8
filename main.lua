@@ -102,6 +102,9 @@ function generate_snake_segment(snake, xpos, ypos, dir)
     set_color_cmpt(segment, 3)
     set_direction_cmpt(segment, dir)
 
+    segment.last = {}
+    set_pos_cmpt(segment.last, xpos, ypos)
+
     add(snake.segments, segment)
 end
 
@@ -153,17 +156,30 @@ function _update()
     -- move all of the snake pieces
     move_cnt += 1
     if move_cnt == 15 then
-        for segment in all(snake.segments) do
-            if segment.dir == dir.up then
-                segment.pos.y -= segment.size
-            elseif segment.dir == dir.down then
-                segment.pos.y += segment.size
-            elseif segment.dir == dir.left then
-                segment.pos.x -= segment.size
-            elseif segment.dir == dir.right then
-                segment.pos.x += segment.size
-            end
+        -- move the snake head and record its last position
+        snake_head = snake.segments[1]
+        snake_head.last.pos.x = snake_head.pos.x
+        snake_head.last.pos.y = snake_head.pos.y
+
+        if snake_head.dir == dir.up then
+            snake_head.pos.y -= snake_head.size
+        elseif snake_head.dir == dir.down then
+            snake_head.pos.y += snake_head.size
+        elseif snake_head.dir == dir.left then
+            snake_head.pos.x -= snake_head.size
+        elseif snake_head.dir == dir.right then
+            snake_head.pos.x += snake_head.size
         end
+
+        for i=2,#snake.segments do
+            prev_segment = snake.segments[i - 1]
+            segment = snake.segments[i]
+            segment.last.pos.x = segment.pos.x
+            segment.last.pos.y = segment.pos.y
+            segment.pos.x = prev_segment.last.pos.x
+            segment.pos.y = prev_segment.last.pos.y
+        end
+
         move_cnt = 0
     end
 
@@ -174,6 +190,8 @@ function _update()
             score += 1
             pellet.eaten = true
             any_pellets_eaten = true
+            last_segment = snake.segments[#snake.segments]
+            generate_snake_segment(snake, last_segment.last.pos.x, last_segment.last.pos.y, dir.up) -- fixme: dir.up not needed
         end
     end
 
@@ -212,6 +230,6 @@ function _draw()
     foreach(pellets, draw_sqr)
     print("score: "..score, 0, 0, 7)
 
-    printsqr("sk", snake.segments[1].pos, snake.segments[1].size, 0, 10)
-    printsqr("p", pellets[1].pos, pellets[1].size, 0, 20)
+    -- printsqr("sk", snake.segments[1].pos, snake.segments[1].size, 0, 10)
+    -- printsqr("p", pellets[1].pos, pellets[1].size, 0, 20)
 end
