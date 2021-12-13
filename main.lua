@@ -1,4 +1,3 @@
--- FIXME: should I be using the local keyword through to local variables? that seems to be a 'thing' in lua
 pico8_screen_size = 128
 pellets = {}
 snake = {
@@ -25,6 +24,7 @@ end
 
 function set_direction_cmpt(e, dir)
     e.dir = dir
+    e.next_dir = dir
 end
 
 function set_color_cmpt(e, color)
@@ -77,7 +77,7 @@ function poll_input(input)
         }
     end
 
-    new_input = {
+    local new_input = {
         btn_left = btn(0),
         btn_right = btn(1),
         btn_up = btn(2),
@@ -103,8 +103,8 @@ function poll_input(input)
 end
 
 function generate_snake_segment(snake, xpos, ypos, dir)
-    segment = {}
-    snake_size = 8
+    local segment = {}
+    local snake_size = 8
 
     set_pos_cmpt(segment, xpos, ypos)
     set_size_cmpt(segment, snake_size)
@@ -119,11 +119,11 @@ function generate_snake_segment(snake, xpos, ypos, dir)
 end
 
 function generate_pellet(pellets)
-    pellet = {}
-    pellet_size = 8
+    local pellet = {}
+    local pellet_size = 8
 
-    pellet_x = flr(rnd_int_range(0, pico8_screen_size) / pellet_size) * pellet_size
-    pellet_y = flr(rnd_int_range(0, pico8_screen_size) / pellet_size) * pellet_size
+    local pellet_x = flr(rnd_int_range(0, pico8_screen_size) / pellet_size) * pellet_size
+    local pellet_y = flr(rnd_int_range(0, pico8_screen_size) / pellet_size) * pellet_size
 
     set_pos_cmpt(pellet, pellet_x, pellet_y)
     set_size_cmpt(pellet, pellet_size)
@@ -143,7 +143,7 @@ function rnd_int_range(lower, upper)
 end
 
 function update_direction(input, snake)
-    new_dir = nil
+    local new_dir = nil
     if input.btn_left and input.btn_left_change then
         new_dir = dir.left
     elseif input.btn_right and input.btn_right_change then
@@ -155,7 +155,7 @@ function update_direction(input, snake)
     end
 
     if new_dir != nil then
-        head = snake.segments[1]
+        local head = snake.segments[1]
 
         -- don't allow the head to move back on itself
         if (new_dir == dir.left and head.dir == dir.right) or
@@ -165,7 +165,7 @@ function update_direction(input, snake)
            return
         end
 
-        head.dir = new_dir
+        head.next_dir = new_dir
     end
 end
 
@@ -194,6 +194,7 @@ function game_screen_update()
         snake_head.last.pos.x = snake_head.pos.x
         snake_head.last.pos.y = snake_head.pos.y
 
+        snake_head.dir = snake_head.next_dir
         if snake_head.dir == dir.up then
             snake_head.pos.y -= snake_head.size
         elseif snake_head.dir == dir.down then
@@ -230,7 +231,7 @@ function game_screen_update()
 
 
     -- check for collisions with any pellets
-    any_pellets_eaten = false
+    local any_pellets_eaten = false
     for pellet in all(pellets) do
         if collides(snake.segments[1], pellet) then
             score += 1
@@ -250,7 +251,7 @@ function game_screen_update()
     -- NOTE: improve by supporting spawning multiple pellets
     if any_pellets_eaten then
         -- clean up any eaten pellets
-        next_pellet_idx = 1
+        local next_pellet_idx = 1
         while next_pellet_idx <= #pellets do
             if pellets[next_pellet_idx].eaten then
                 pellets[next_pellet_idx] = pellets[#pellets]
@@ -269,7 +270,7 @@ end
 
 flash_cnt = 0
 function game_over_screen_update()
-    tail_segment = nil
+    local tail_segment = nil
     for segment in all(snake.segments) do
         if segment ~= snake.segments[1] and segment.game_over_collision then
             tail_segment = segment
@@ -279,7 +280,7 @@ function game_over_screen_update()
 
     flash_cnt = (flash_cnt + 1) % 30
 
-    color = snake_color
+    local color = snake_color
     if flash_cnt <= 15 then
         color = snake_flash_color
     end
@@ -307,5 +308,6 @@ function _draw()
     -- printsqr("p", pellets[1].pos, pellets[1].size, 0, 20)
 
     if game_over then
+        -- FIXME: add game over text
     end
 end
