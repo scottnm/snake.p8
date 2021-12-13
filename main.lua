@@ -231,6 +231,16 @@ function game_screen_update()
         end
     end
 
+    -- check for collision with walls
+    if (snake.segments[1].pos.x < 0) or
+       (snake.segments[1].pos.x >= 128) or
+       (snake.segments[1].pos.y < 0) or
+       (snake.segments[1].pos.y >= 128) then
+       snake.segments[1].game_over_collision = true
+       game_over = true
+       return
+    end
+
     -- check for collisions with any pellets
     local any_pellets_eaten = false
     for pellet in all(pellets) do
