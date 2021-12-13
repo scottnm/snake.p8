@@ -143,15 +143,29 @@ function rnd_int_range(lower, upper)
 end
 
 function update_direction(input, snake)
-    head = snake.segments[1]
+    new_dir = nil
     if input.btn_left and input.btn_left_change then
-        head.dir = dir.left
+        new_dir = dir.left
     elseif input.btn_right and input.btn_right_change then
-        head.dir = dir.right
+        new_dir = dir.right
     elseif input.btn_up and input.btn_up_change then
-        head.dir = dir.up
+        new_dir = dir.up
     elseif input.btn_down and input.btn_down_change then
-        head.dir = dir.down
+        new_dir = dir.down
+    end
+
+    if new_dir != nil then
+        head = snake.segments[1]
+
+        -- don't allow the head to move back on itself
+        if (new_dir == dir.left and head.dir == dir.right) or
+           (new_dir == dir.right and head.dir == dir.left) or
+           (new_dir == dir.up and head.dir == dir.down) or
+           (new_dir == dir.down and head.dir == dir.up) then
+           return
+        end
+
+        head.dir = new_dir
     end
 end
 
