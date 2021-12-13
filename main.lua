@@ -224,6 +224,8 @@ function game_screen_update()
         -- FIXME: maybe snake head should be a special element in the snake data
         tail_segment = snake.segments[i]
         if collides(snake.segments[1], tail_segment) then
+            snake.segments[1].pos.x = snake.segments[1].last.pos.x
+            snake.segments[1].pos.y = snake.segments[1].last.pos.y
             snake.segments[1].game_over_collision = true
             tail_segment.game_over_collision = true
             game_over = true
@@ -232,13 +234,18 @@ function game_screen_update()
     end
 
     -- check for collision with walls
-    if (snake.segments[1].pos.x < 0) or
-       (snake.segments[1].pos.x >= 128) or
-       (snake.segments[1].pos.y < 0) or
-       (snake.segments[1].pos.y >= 128) then
-       snake.segments[1].game_over_collision = true
-       game_over = true
-       return
+    local snake_collided_with_wall =
+        (snake.segments[1].pos.x < 0) or
+        (snake.segments[1].pos.x >= 128) or
+        (snake.segments[1].pos.y < 0) or
+        (snake.segments[1].pos.y >= 128)
+
+    if snake_collided_with_wall then
+        snake.segments[1].pos.x = snake.segments[1].last.pos.x
+        snake.segments[1].pos.y = snake.segments[1].last.pos.y
+        snake.segments[1].game_over_collision = true
+        game_over = true
+        return
     end
 
     -- check for collisions with any pellets
@@ -314,8 +321,16 @@ end
 
 function _draw()
     cls(4)
-    foreach(snake.segments, draw_sqr)
+    -- draw the tail segments
+    for i=2,#snake.segments do
+        draw_sqr(snake.segments[i])
+    end
+    draw_sqr(snake.segments[1])
+    -- draw the head last so it's always drawn on top of the tail
+
+    -- draw all (1) pellets
     foreach(pellets, draw_sqr)
+
     print("score: "..score, 0, 0, 7)
     -- printsqr("sk", snake.segments[1].pos, snake.segments[1].size, 0, 10)
     -- printsqr("p", pellets[1].pos, pellets[1].size, 0, 20)
