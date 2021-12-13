@@ -308,6 +308,6 @@ function _draw()
     -- printsqr("p", pellets[1].pos, pellets[1].size, 0, 20)
 
     if game_over then
-        -- FIXME: add game over text
+        print("GAME OVER", 30, 30, 7);
     end
 end
