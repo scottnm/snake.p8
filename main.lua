@@ -308,6 +308,8 @@ function _draw()
     -- printsqr("p", pellets[1].pos, pellets[1].size, 0, 20)
 
     if game_over then
-        print("GAME OVER", 30, 30, 7);
+        if flash_cnt <= 15 then
+            print("GAME OVER", 30, 30, 7);
+        end
     end
 end
