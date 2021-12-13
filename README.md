@@ -1,6 +1,8 @@
 # SNAKE P8
 
-A Pico-8 implementation of snake
+My first pico-8 project. An implementation of 'snake'.
+
+The implementation is gross as sin and incredibly simple. The purpose of this project isn't to do anything interesting but just to give me something concrete to learn a little bit of pico-8 programming.
 
 ## Editing
 
