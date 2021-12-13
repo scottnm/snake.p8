@@ -3,7 +3,8 @@ pellets = {}
 snake = {
     segments = {},
 }
-snake_color = 3
+snake_head_color = 3
+snake_tail_color = 11
 snake_flash_color = 8
 game_over = false
 score = 0
@@ -102,15 +103,16 @@ function poll_input(input)
     return input
 end
 
-function generate_snake_segment(snake, xpos, ypos, dir)
+function generate_snake_segment(snake, xpos, ypos, color)
     local segment = {}
     local snake_size = 8
 
     set_pos_cmpt(segment, xpos, ypos)
     set_size_cmpt(segment, snake_size)
     -- set_rect_collider_cmpt(segment, snake_size, snake_size)
-    set_color_cmpt(segment, snake_color)
-    set_direction_cmpt(segment, dir)
+    set_color_cmpt(segment, color)
+    -- FIXME: only the head needs a direction cmpt
+    set_direction_cmpt(segment, dir.up)
 
     segment.last = {}
     set_pos_cmpt(segment.last, xpos, ypos)
@@ -134,7 +136,7 @@ function generate_pellet(pellets)
 end
 
 function _init()
-    generate_snake_segment(snake, 64, 64, dir.up)
+    generate_snake_segment(snake, 64, 64, snake_head_color)
     generate_pellet(pellets)
 end
 
@@ -229,7 +231,6 @@ function game_screen_update()
         end
     end
 
-
     -- check for collisions with any pellets
     local any_pellets_eaten = false
     for pellet in all(pellets) do
@@ -238,7 +239,7 @@ function game_screen_update()
             pellet.eaten = true
             any_pellets_eaten = true
             last_segment = snake.segments[#snake.segments]
-            generate_snake_segment(snake, last_segment.last.pos.x, last_segment.last.pos.y, dir.up) -- fixme: dir.up not needed
+            generate_snake_segment(snake, last_segment.last.pos.x, last_segment.last.pos.y, snake_tail_color)
 
             -- every 3rd snake segment, make the snake move faster
             -- but cap out our speed increases at a certain point
@@ -280,14 +281,16 @@ function game_over_screen_update()
 
     flash_cnt = (flash_cnt + 1) % 30
 
-    local color = snake_color
+    local head_color = snake_head_color
+    local tail_color = snake_tail_color
     if flash_cnt <= 15 then
-        color = snake_flash_color
+        head_color = snake_flash_color
+        tail_color = snake_flash_color
     end
 
-    snake.segments[1].color = color
+    snake.segments[1].color = head_color
     if tail_segment ~= nil then
-        tail_segment.color = color
+        tail_segment.color = tail_color
     end
 end
 
