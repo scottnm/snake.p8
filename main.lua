@@ -1,3 +1,4 @@
+-- FIXME: should I be using the local keyword through to local variables? that seems to be a 'thing' in lua
 pico8_screen_size = 128
 pellets = {}
 snake = {
@@ -17,9 +18,10 @@ function set_size_cmpt(e, size)
     e.size = size
 end
 
-function set_rect_collider_cmpt(e, w, h)
-    e.collider = { width = w, height = h }
-end
+-- FIXME: couldn't quite get my collision right. simplifying to assume all pellets and snake segments are the same size and just doing collision checks based on position
+-- function set_rect_collider_cmpt(e, w, h)
+--     e.collider = { width = w, height = h }
+-- end
 
 function set_direction_cmpt(e, dir)
     e.dir = dir
@@ -30,15 +32,19 @@ function set_color_cmpt(e, color)
 end
 
 function rect_collision(e1, e2)
-    x_collision_start = e1.pos.x - e2.collider.width
-    x_collision_end = e1.pos.x + e1.collider.width
-    y_collision_start = e1.pos.y - e2.collider.height
-    y_collision_end = e1.pos.y + e1.collider.height
+    -- x_collision_start = e1.pos.x - e2.collider.width
+    -- x_collision_end = e1.pos.x + e1.collider.width
+    -- y_collision_start = e1.pos.y - e2.collider.height
+    -- y_collision_end = e1.pos.y + e1.collider.height
 
-    return e2.pos.x >= x_collision_start and 
-           e2.pos.x <= x_collision_end and
-           e2.pos.y >= y_collision_start and
-           e2.pos.y <= y_collision_end
+    -- return e2.pos.x >= x_collision_start and
+    --        e2.pos.x < x_collision_end and
+    --        e2.pos.y >= y_collision_start and
+    --        e2.pos.y < y_collision_end
+
+    -- simplify for now
+    -- assume all pellets and snake segments are the same size
+    return e1.pos.x == e2.pos.x and e1.pos.y == e2.pos.y
 end
 
 function collides(e1, e2)
@@ -102,7 +108,7 @@ function generate_snake_segment(snake, xpos, ypos, dir)
 
     set_pos_cmpt(segment, xpos, ypos)
     set_size_cmpt(segment, snake_size)
-    set_rect_collider_cmpt(segment, snake_size, snake_size)
+    -- set_rect_collider_cmpt(segment, snake_size, snake_size)
     set_color_cmpt(segment, snake_color)
     set_direction_cmpt(segment, dir)
 
@@ -121,7 +127,7 @@ function generate_pellet(pellets)
 
     set_pos_cmpt(pellet, pellet_x, pellet_y)
     set_size_cmpt(pellet, pellet_size)
-    set_rect_collider_cmpt(pellet, pellet_size, pellet_size)
+    -- set_rect_collider_cmpt(pellet, pellet_size, pellet_size)
     set_color_cmpt(pellet, 7)
 
     add(pellets, pellet)
@@ -264,9 +270,9 @@ function game_over_screen_update()
         color = snake_flash_color
     end
 
-    snake.segments[1].color = color    
+    snake.segments[1].color = color
     if tail_segment ~= nil then
-        tail_segment.color = color    
+        tail_segment.color = color
     end
 end
 
@@ -285,7 +291,7 @@ function _draw()
     print("score: "..score, 0, 0, 7)
     -- printsqr("sk", snake.segments[1].pos, snake.segments[1].size, 0, 10)
     -- printsqr("p", pellets[1].pos, pellets[1].size, 0, 20)
-    
+
     if game_over then
     end
 end
