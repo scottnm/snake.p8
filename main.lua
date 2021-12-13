@@ -179,6 +179,13 @@ function _update()
     end
 end
 
+function rollback_snake_movement(snake)
+    for segment in all(snake.segments) do
+        segment.pos.x = segment.last.pos.x
+        segment.pos.y = segment.last.pos.y
+    end
+end
+
 move_cnt = 0
 move_period = 15
 function game_screen_update()
@@ -224,10 +231,8 @@ function game_screen_update()
         -- FIXME: maybe snake head should be a special element in the snake data
         tail_segment = snake.segments[i]
         if collides(snake.segments[1], tail_segment) then
-            snake.segments[1].pos.x = snake.segments[1].last.pos.x
-            snake.segments[1].pos.y = snake.segments[1].last.pos.y
+            rollback_snake_movement(snake)
             snake.segments[1].game_over_collision = true
-            tail_segment.game_over_collision = true
             game_over = true
             return
         end
@@ -241,8 +246,7 @@ function game_screen_update()
         (snake.segments[1].pos.y >= 128)
 
     if snake_collided_with_wall then
-        snake.segments[1].pos.x = snake.segments[1].last.pos.x
-        snake.segments[1].pos.y = snake.segments[1].last.pos.y
+        rollback_snake_movement(snake)
         snake.segments[1].game_over_collision = true
         game_over = true
         return
@@ -288,27 +292,14 @@ end
 
 flash_cnt = 0
 function game_over_screen_update()
-    local tail_segment = nil
-    for segment in all(snake.segments) do
-        if segment ~= snake.segments[1] and segment.game_over_collision then
-            tail_segment = segment
-            break
-        end
-    end
-
     flash_cnt = (flash_cnt + 1) % 30
 
     local head_color = snake_head_color
-    local tail_color = snake_tail_color
     if flash_cnt <= 15 then
         head_color = snake_flash_color
-        tail_color = snake_flash_color
     end
 
     snake.segments[1].color = head_color
-    if tail_segment ~= nil then
-        tail_segment.color = tail_color
-    end
 end
 
 function draw_sqr(sqr)
